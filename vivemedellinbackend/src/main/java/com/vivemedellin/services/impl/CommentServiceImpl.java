@@ -11,6 +11,7 @@ import com.vivemedellin.repositories.CommentRepo;
 import com.vivemedellin.repositories.PostRepo;
 import com.vivemedellin.repositories.UserRepo;
 import com.vivemedellin.services.CommentService;
+import com.vivemedellin.services.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,9 @@ public class CommentServiceImpl implements CommentService {
     @Autowired
     private CommentRepo commentRepo;
 
+    @Autowired
+    private NotificationService notificationService;
+
     @Override
     public CommentDto createComment(CommentDto commentDto, Integer postId, Principal principal) {
         Post post = this.postRepo.findById(postId)
@@ -48,6 +52,9 @@ public class CommentServiceImpl implements CommentService {
         comment.setCreatedDate(new Date());
         
         Comment savedComment = this.commentRepo.save(comment);
+
+        notificationService.createNotificationForCommentOnOwnPost(post, savedComment, user);
+        notificationService.createNotificationForNewCommentOnSavedPost(post, savedComment, user);
 
         return mapToDto(savedComment, false);
     }
@@ -69,6 +76,9 @@ public class CommentServiceImpl implements CommentService {
         reply.setCreatedDate(new Date());
 
         Comment savedReply = this.commentRepo.save(reply);
+
+        notificationService.createNotificationForReplyToComment(parentComment, savedReply, user);
+        notificationService.createNotificationForNewCommentOnSavedPost(parentComment.getPost(), savedReply, user);
 
         return mapToDto(savedReply, false);
     }
