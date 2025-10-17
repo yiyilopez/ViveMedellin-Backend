@@ -90,6 +90,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/comments/*").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/category/{categoryId}/posts").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/dashboard/**").permitAll()
                         .requestMatchers("/api/notifications/**").authenticated()
                         .requestMatchers("/api/saved-posts/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/users/").hasRole("ADMIN")
