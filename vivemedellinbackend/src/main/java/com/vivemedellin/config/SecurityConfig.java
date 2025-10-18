@@ -96,6 +96,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/saved-posts/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/users/").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/users/{userId}").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/users/profile-image/upload/*").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/users/profile-image/*").permitAll()
                         .requestMatchers(HttpMethod.PUT, "/api/posts/**").hasRole("USER")
                         .requestMatchers(HttpMethod.PUT, "/api/users/{userId}").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/users/{userId}").hasRole("ADMIN")

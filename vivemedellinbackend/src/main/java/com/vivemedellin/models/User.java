@@ -29,6 +29,9 @@ public class User{
     private String password;
     private String about;
 
+    @Column(name = "profile_image")
+    private String profileImage;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Post> posts = new ArrayList<>();
 
