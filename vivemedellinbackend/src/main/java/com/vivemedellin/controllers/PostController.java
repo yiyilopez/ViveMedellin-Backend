@@ -10,6 +10,13 @@ import com.vivemedellin.services.FileService;
 import com.vivemedellin.services.PostService;
 import com.vivemedellin.services.UserService;
 import com.vivemedellin.utils.JwtUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,6 +36,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api")
+@Tag(name = "Posts (Eventos)", description = "Gestión de publicaciones/eventos - crear, actualizar, buscar y listar eventos en Medellín")
 public class PostController {
 
     @Autowired
@@ -49,6 +57,17 @@ public class PostController {
     @Value("${project.image}")
     private String path;
 
+    @Operation(
+            summary = "Crear nuevo post/evento",
+            description = "Crea una nueva publicación o evento. Permite subir una imagen opcional. El usuario debe estar autenticado y solo puede crear posts en su propio nombre.",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Post creado exitosamente",
+                    content = @Content(schema = @Schema(implementation = PostDto.class))),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "No autorizado - El usuario no puede crear posts para otro usuario"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Usuario o categoría no encontrados")
+    })
     @PostMapping("/user/{userId}/category/{categoryId}/posts")
     public ResponseEntity<PostDto> createPost(
             @RequestParam("postTitle") String postTitle,
