@@ -46,6 +46,14 @@ public class CommentController {
         return new ResponseEntity<>(comment, HttpStatus.OK);
     }
 
+    @PutMapping("/comments/{commentId}")
+    public ResponseEntity<CommentDto> updateComment(@RequestBody CommentDto commentDto,
+                                                    @PathVariable Integer commentId,
+                                                    Principal principal) {
+        CommentDto updatedComment = this.commentService.updateComment(commentDto, commentId, principal);
+        return new ResponseEntity<>(updatedComment, HttpStatus.OK);
+    }
+
     @DeleteMapping("/comments/{commentId}")
     public ResponseEntity<ApiResponse> deleteComment(@PathVariable Integer commentId, Principal principal) {
         this.commentService.deleteComment(commentId, principal);

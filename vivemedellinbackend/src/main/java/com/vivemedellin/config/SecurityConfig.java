@@ -87,6 +87,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/comments/*/replies").hasRole("USER")
                         .requestMatchers(HttpMethod.GET, "/api/posts/*/comments").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/comments/*").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/comments/*").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/comments/*").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/category/{categoryId}/posts").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll()

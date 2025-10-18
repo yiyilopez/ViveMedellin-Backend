@@ -106,6 +106,26 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    public CommentDto updateComment(CommentDto commentDto, Integer commentId, Principal principal) {
+        Comment comment = this.commentRepo.findById(commentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Comment", "commentId", commentId));
+
+        String username = principal.getName();
+        User currentUser = this.userRepo.findByEmail(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", username));
+
+        if (!comment.getUser().getId().equals(currentUser.getId())) {
+            throw new AccessDeniedException("No tienes permisos para editar este comentario");
+        }
+
+        comment.setContent(commentDto.getContent());
+        comment.setEditedDate(new Date());
+        Comment updatedComment = this.commentRepo.save(comment);
+
+        return mapToDto(updatedComment, false);
+    }
+
+    @Override
     public void deleteComment(Integer commentId, Principal principal) {
         Comment comment = this.commentRepo.findById(commentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Comment", "commentId", commentId));
@@ -129,6 +149,7 @@ public class CommentServiceImpl implements CommentService {
         dto.setId(comment.getId());
         dto.setContent(comment.getContent());
         dto.setCreatedDate(comment.getCreatedDate());
+        dto.setEditedDate(comment.getEditedDate());
 
         UserResponseDto userDto = new UserResponseDto();
         userDto.setId(comment.getUser().getId());

@@ -24,6 +24,10 @@ public class Comment {
     @Column(name = "created_date")
     private Date createdDate = new Date();
 
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "edited_date")
+    private Date editedDate;
+
     @ManyToOne
     @JoinColumn(name = "post_id")
     private Post post;

@@ -14,5 +14,7 @@ public interface CommentService {
 
     CommentDto getCommentWithReplies(Integer commentId);
 
+    CommentDto updateComment(CommentDto commentDto, Integer commentId, Principal principal);
+
     void deleteComment(Integer commentId, Principal principal);
 }

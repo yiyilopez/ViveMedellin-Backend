@@ -17,6 +17,8 @@ public class CommentDto {
 
     private Date createdDate;
 
+    private Date editedDate;
+
     private UserResponseDto user;
 
     private Integer parentCommentId;
