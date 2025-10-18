@@ -37,5 +37,7 @@ public class UserDto {
     @Size(min = 10, message = "About section must be at least 10 characters long")
     private String about;
 
+    private String profileImage;
+
     private Set<Role> roles;
 }
