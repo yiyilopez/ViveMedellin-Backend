@@ -181,7 +181,6 @@ mvn clean install
 mvn spring-boot:run
 ```
 
-La API estará disponible en: `http://localhost:8080`
 
 ## Endpoints Principales
 
@@ -258,18 +257,6 @@ Las contribuciones son bienvenidas. Por favor:
 ## Licencia
 
 Este proyecto es parte de **ViveMedellin** - Plataforma para descubrir Medellín.
-
-## Autor
-
-**Yiyi Lopez**
-- GitHub: [@yiyilopez](https://github.com/yiyilopez)
-
----
-
-<div align="center">
-Made in Medellín, Colombia
-</div>
-# ViveMedellin - API Documentation
 
 ## Base URL
 ```
