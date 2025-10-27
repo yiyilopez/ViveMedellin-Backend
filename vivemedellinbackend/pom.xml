@@ -22,6 +22,16 @@
 	<developers>
 		<developer>
 			<name>Yiyi Lopez</name>
+			<roles>
+				<role>Backend Developer</role>
+			</roles>
+		</developer>
+		<developer>
+			<name>Carlos Castaño</name>
+			<email>carlose.castano@udea.edu.co</email>
+			<roles>
+				<role>DevOps</role>
+			</roles>
 		</developer>
 	</developers>
 	<scm>
