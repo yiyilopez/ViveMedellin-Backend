@@ -24,9 +24,11 @@ public class UserRepoTest {
             "1234",
             "Soy un usuario de prueba"
         );
-        User saved = userRepo.save(testUser);
+        userRepo.save(testUser);
+
         // Act
-        Optional<User> foundOptional = userRepo.findByEmail(saved.getEmail());
+        Optional<User> foundOptional = userRepo.findByEmail(testUser.getEmail());
+
         // Assert
         assertTrue(foundOptional.isPresent(), "El usuario debería existir en la base de datos");
         User foundUser = foundOptional.get();
