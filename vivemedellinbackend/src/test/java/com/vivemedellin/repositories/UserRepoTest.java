@@ -34,7 +34,17 @@ public class UserRepoTest {
         User foundUser = foundOptional.get();
         assertEquals("user@gmail.com", foundUser.getEmail(),
             "El email del usuario encontrado debería coincidir con el de prueba");
+        }
 
-}
+    @Test
+    void shouldReturnEmpty_whenEmailDoesNotExist() {
+        // Arrange
+
+        // Act
+        Optional<User> foundOptional = userRepo.findByEmail("nonexistent@gmail.com");
+        
+        // Assert
+        assertTrue(foundOptional.isEmpty(), "El resultado debería estar vacío si el email no existe");
+    }
 
 }
