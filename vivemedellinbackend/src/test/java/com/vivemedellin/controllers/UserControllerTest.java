@@ -6,7 +6,9 @@ import com.vivemedellin.models.Role;
 import com.vivemedellin.models.User;
 import com.vivemedellin.payloads.JwtAuthResponse;
 import com.vivemedellin.payloads.LoginRequest;
+import com.vivemedellin.security.CustomUserDetailService; //NUEVO
 import com.vivemedellin.services.UserService;
+import com.vivemedellin.filters.JwtAuthenticationFilter;  //NUEVO
 import com.vivemedellin.utils.JwtUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +48,12 @@ public class UserControllerTest {
 
     @MockBean
     private JwtUtil jwtUtil;
+
+    @MockBean
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @MockBean
+    private CustomUserDetailService customUserDetailService;
 
     @Test
     void shouldAuthenticateUser_whenValidCredentialsProvided() throws Exception {
