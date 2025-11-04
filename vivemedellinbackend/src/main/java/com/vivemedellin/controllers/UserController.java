@@ -4,6 +4,7 @@ import com.vivemedellin.payloads.ApiResponse;
 import com.vivemedellin.payloads.ImageResponse;
 import com.vivemedellin.payloads.JwtAuthResponse;
 import com.vivemedellin.payloads.LoginRequest;
+import com.vivemedellin.payloads.LoginResponse;
 import com.vivemedellin.payloads.UserDto;
 import com.vivemedellin.services.FileService;
 import com.vivemedellin.utils.JwtUtil;
@@ -75,13 +76,23 @@ public class UserController {
                 return new ResponseEntity<>(new JwtAuthResponse("User created", token), HttpStatus.CREATED);
         }
 
-        @Operation(summary = "Iniciar sesión", description = "Autentica un usuario y devuelve un token JWT válido por 30 minutos")
+        @Operation(
+                summary = "Iniciar sesión", 
+                description = "Autentica un usuario con su email y contraseña. Devuelve un token JWT válido por 30 minutos junto con los datos completos del usuario (id, nombre, email, roles, etc.)"
+        )
         @ApiResponses(value = {
-                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Login exitoso", content = @Content(schema = @Schema(implementation = JwtAuthResponse.class))),
-                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Credenciales inválidas")
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                                responseCode = "200", 
+                                description = "Login exitoso - Retorna token JWT y datos del usuario", 
+                                content = @Content(schema = @Schema(implementation = LoginResponse.class))
+                        ),
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                                responseCode = "401", 
+                                description = "Credenciales inválidas - Email o contraseña incorrectos"
+                        )
         })
         @PostMapping("/login")
-        public ResponseEntity<JwtAuthResponse> login(@RequestBody LoginRequest loginRequest) {
+        public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
                 try {
                         authenticationManager.authenticate(
                                         new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),
@@ -90,10 +101,24 @@ public class UserController {
                         UserDetails userDetails = userService.loadUserByUsername(loginRequest.getUsername());
                         String token = jwtUtil.generateToken(userDetails);
 
-                        return ResponseEntity.ok(new JwtAuthResponse("Login successful", token));
+                        // Obtener datos completos del usuario
+                        UserDto userDto = userService.getUserByEmail(loginRequest.getUsername());
+                        
+                        // Crear el objeto UserInfo para la respuesta
+                        LoginResponse.UserInfo userInfo = new LoginResponse.UserInfo(
+                                userDto.getId(),
+                                userDto.getName(),
+                                userDto.getEmail(),
+                                userDto.getAbout(),
+                                userDto.getProfileImage(),
+                                userDto.getRoles()
+                        );
+
+                        LoginResponse response = new LoginResponse("Login successful", token, userInfo);
+                        return ResponseEntity.ok(response);
                 } catch (BadCredentialsException e) {
                         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                                        .body(new JwtAuthResponse("Invalid credentials", null));
+                                        .body(new LoginResponse("Invalid credentials", null, null));
                 }
         }
 

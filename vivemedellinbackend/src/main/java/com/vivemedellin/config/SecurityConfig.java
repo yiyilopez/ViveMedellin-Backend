@@ -103,8 +103,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/users/profile-image/upload/*").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/users/profile-image/*").permitAll()
                         .requestMatchers(HttpMethod.PUT, "/api/posts/**").hasRole("USER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/posts/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/comments/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/users/{userId}").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/users/{userId}").hasRole("ADMIN")
+                        .requestMatchers("/api/categories/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))

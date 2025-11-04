@@ -32,6 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -145,8 +146,8 @@ public class PostController {
     }
 
     @DeleteMapping("/posts/{postId}")
-    public ApiResponse deletePost(@PathVariable Integer postId){
-        this.postService.deletePost(postId);
+    public ApiResponse deletePost(@PathVariable Integer postId, Principal principal){
+        this.postService.deletePost(postId, principal);
         return new ApiResponse("Post is Deleted Successfully! ", true);
     }
 
