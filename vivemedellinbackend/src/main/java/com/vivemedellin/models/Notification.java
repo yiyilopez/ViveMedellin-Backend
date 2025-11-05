@@ -34,7 +34,7 @@ public class Notification {
     private Post post;
 
     @ManyToOne
-    @JoinColumn(name = "comment_id")
+    @JoinColumn(name = "comment_id", nullable = true)
     private Comment comment;
 
     @ManyToOne
