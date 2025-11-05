@@ -19,28 +19,36 @@ public class FileServiceImpl implements FileService {
             throw new IllegalArgumentException("Only image files are allowed to upload!");
         }
 
-        String name = file.getOriginalFilename();
-
-        String randomID = UUID.randomUUID().toString();
-        String fileExtension = name.substring(name.lastIndexOf("."));
-        String fileName = randomID.concat(fileExtension);
-
-        String filePath = path + File.separator + fileName;
-
-        File f = new File(path);
-        if (!f.exists()) {
-            f.mkdir();
+        String originalName = file.getOriginalFilename();
+        if (originalName == null) {
+            originalName = "file"; // fallback name
         }
 
-        Files.copy(file.getInputStream(), Paths.get(filePath));
+        String randomID = UUID.randomUUID().toString();
+        int dotIndex = originalName.lastIndexOf('.');
+        String fileExtension = dotIndex >= 0 ? originalName.substring(dotIndex) : "";
+        String fileName = randomID.concat(fileExtension);
+
+        // Ensure the directory exists (create parent directories if needed)
+        java.nio.file.Path folderPath = Paths.get(path);
+        Files.createDirectories(folderPath);
+
+        java.nio.file.Path destination = folderPath.resolve(fileName);
+
+        try (InputStream is = file.getInputStream()) {
+            Files.copy(is, destination);
+        }
+
         return fileName;
     }
 
     @Override
     public InputStream getResource(String path, String fileName) throws FileNotFoundException {
-        String fullPath = path+ File.separator+ fileName;
-        InputStream is = new FileInputStream(fullPath);
-
-        return is;
+        java.nio.file.Path fullPath = Paths.get(path).resolve(fileName);
+        File f = fullPath.toFile();
+        if (!f.exists()) {
+            throw new FileNotFoundException("File not found: " + fullPath.toString());
+        }
+        return new FileInputStream(f);
     }
 }
