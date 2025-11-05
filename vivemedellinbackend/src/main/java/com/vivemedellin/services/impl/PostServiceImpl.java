@@ -86,9 +86,21 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public void deletePost(Integer postId) {
+    public void deletePost(Integer postId, java.security.Principal principal) {
         Post post = this.postRepo.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "postId", postId));
+        
+        String username = principal.getName();
+        User currentUser = this.userRepo.findByEmail(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", username));
+        
+        boolean isOwner = post.getUser().getId().equals(currentUser.getId());
+        boolean isAdmin = currentUser.getRoles().contains(com.vivemedellin.models.Role.ROLE_ADMIN);
+        
+        if (!isOwner && !isAdmin) {
+            throw new org.springframework.security.access.AccessDeniedException("No tienes permisos para eliminar este post");
+        }
+        
         this.postRepo.delete(post);
     }
 

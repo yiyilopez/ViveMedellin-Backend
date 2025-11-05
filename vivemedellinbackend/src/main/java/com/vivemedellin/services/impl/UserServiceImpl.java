@@ -87,6 +87,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserDto getUserByEmail(String email) {
+        User user = this.userRepo.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
+
+        return this.userToDto(user);
+    }
+
+    @Override
     public List<UserDto> getAllUsers() {
         List<User> users = this.userRepo.findAll();
         return users.stream().map(this::userToDto).collect(Collectors.toList());
