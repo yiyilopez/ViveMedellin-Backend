@@ -33,6 +33,8 @@ public class UserDto {
     )
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
+        @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+        private String password;
 
     @Size(min = 10, message = "About section must be at least 10 characters long")
     private String about;

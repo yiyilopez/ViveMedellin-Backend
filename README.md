@@ -224,7 +224,6 @@ mvn clean install
 mvn spring-boot:run
 ```
 
-La API estará disponible en: `http://localhost:8080`
 
 ## Endpoints Principales
 
@@ -340,5 +339,520 @@ Swagger incluye:
 ---
 
 ## Licencia
+## Licencia
+
+Este proyecto es parte de **ViveMedellin** - Plataforma para descubrir Medellín.
+
+## Base URL
+```
+http://localhost:8080/api
+```
+
+## Autenticación
+
+La API utiliza JWT (JSON Web Tokens) para autenticación. Para acceder a endpoints protegidos, incluye el token en el header:
+
+```http
+Authorization: Bearer <tu_token_jwt>
+```
+
+---
+
+## Endpoints de Usuarios
+
+### Registrar Usuario
+Crea una nueva cuenta de usuario.
+
+```http
+POST /users/register
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "name": "Juan Pérez",
+  "email": "juan@example.com",
+  "username": "juanperez",
+  "password": "password123",
+  "about": "Amante de los eventos culturales en Medellín"
+}
+```
+
+**Response:** `201 Created`
+```json
+{
+  "id": 1,
+  "name": "Juan Pérez",
+  "email": "juan@example.com",
+  "username": "juanperez",
+  "about": "Amante de los eventos culturales en Medellín",
+  "roles": ["ROLE_USER"]
+}
+```
+
+---
+
+### Iniciar Sesión
+Autentica un usuario y devuelve un token JWT.
+
+```http
+POST /users/login
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "username": "juanperez",
+  "password": "password123"
+}
+```
+
+**Response:** `200 OK`
+```json
+{
+  "message": "Login successful",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+---
+
+### Actualizar Perfil
+Actualiza la información del usuario autenticado.
+
+```http
+PUT /users/{userId}
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "name": "Juan Pérez Actualizado",
+  "about": "Nueva descripción"
+}
+```
+
+**Response:** `200 OK`
+
+---
+
+### Obtener Usuario por ID
+Obtiene información de un usuario específico.
+
+```http
+GET /users/{userId}
+Authorization: Bearer <token>
+```
+
+**Response:** `200 OK`
+```json
+{
+  "id": 1,
+  "name": "Juan Pérez",
+  "email": "juan@example.com",
+  "username": "juanperez",
+  "about": "Amante de los eventos culturales"
+}
+```
+
+---
+
+## Endpoints de Eventos (Posts)
+
+### Listar Todos los Eventos
+Obtiene una lista paginada de todos los eventos publicados.
+
+```http
+GET /posts?pageNumber=0&pageSize=10&sortBy=createdDate&sortDir=desc
+```
+
+**Query Parameters:**
+- `pageNumber` (opcional): Número de página (default: 0)
+- `pageSize` (opcional): Elementos por página (default: 10)
+- `sortBy` (opcional): Campo para ordenar (default: createdDate)
+- `sortDir` (opcional): Dirección del ordenamiento (asc/desc, default: desc)
+
+**Response:** `200 OK`
+```json
+{
+  "content": [
+    {
+      "postId": 1,
+      "title": "Festival de Jazz en Medellín",
+      "content": "Evento musical con artistas internacionales...",
+      "imageName": "jazz-festival.jpg",
+      "addedDate": "2025-10-15T10:30:00",
+      "category": {
+        "categoryId": 1,
+        "categoryTitle": "Música",
+        "categoryDescription": "Eventos musicales"
+      },
+      "user": {
+        "id": 1,
+        "name": "Juan Pérez"
+      }
+    }
+  ],
+  "pageNumber": 0,
+  "pageSize": 10,
+  "totalElements": 50,
+  "totalPages": 5,
+  "lastPage": false
+}
+```
+
+---
+
+### Obtener Evento por ID
+Obtiene detalles completos de un evento específico.
+
+```http
+GET /posts/{postId}
+```
+
+**Response:** `200 OK`
+```json
+{
+  "postId": 1,
+  "title": "Festival de Jazz en Medellín",
+  "content": "Descripción detallada del evento musical con artistas nacionales e internacionales. Fecha: 20 de octubre, Lugar: Teatro Metropolitano...",
+  "imageName": "jazz-festival.jpg",
+  "addedDate": "2025-10-15T10:30:00",
+  "category": {
+    "categoryId": 1,
+    "categoryTitle": "Música"
+  },
+  "user": {
+    "id": 1,
+    "name": "Juan Pérez",
+    "username": "juanperez"
+  }
+}
+```
+
+---
+
+### Crear Evento
+Publica un nuevo evento en la plataforma.
+
+```http
+POST /posts
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "title": "Caminata Ecológica en el Arví",
+  "content": "Únete a nuestra caminata guiada por el Parque Arví. Exploraremos senderos naturales y aprenderemos sobre la biodiversidad local.",
+  "categoryId": 5,
+  "userId": 1
+}
+```
+
+**Response:** `201 Created`
+```json
+{
+  "postId": 15,
+  "title": "Caminata Ecológica en el Arví",
+  "content": "Únete a nuestra caminata...",
+  "imageName": "default.png",
+  "addedDate": "2025-10-17T14:20:00",
+  "category": {
+    "categoryId": 5,
+    "categoryTitle": "Naturaleza"
+  },
+  "user": {
+    "id": 1,
+    "name": "Juan Pérez"
+  }
+}
+```
+
+---
+
+### Actualizar Evento
+Modifica un evento existente.
+
+```http
+PUT /posts/{postId}
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "title": "Caminata Ecológica ACTUALIZADA",
+  "content": "Contenido actualizado..."
+}
+```
+
+**Response:** `200 OK`
+
+---
+
+### Eliminar Evento
+Elimina un evento de la plataforma.
+
+```http
+DELETE /posts/{postId}
+Authorization: Bearer <token>
+```
+
+**Response:** `200 OK`
+```json
+{
+  "message": "Post deleted successfully",
+  "success": true
+}
+```
+
+---
+
+### Buscar Eventos
+Busca eventos por palabra clave.
+
+```http
+GET /posts/search?keyword=jazz
+```
+
+**Response:** `200 OK` (Array de eventos)
+
+---
+
+### Obtener Eventos por Categoría
+Lista eventos de una categoría específica.
+
+```http
+GET /category/{categoryId}/posts?pageNumber=0&pageSize=10
+```
+
+**Response:** `200 OK` (Respuesta paginada similar a /posts)
+
+---
+
+### Subir Imagen de Evento
+Sube una imagen para un evento.
+
+```http
+POST /posts/image/upload/{postId}
+Authorization: Bearer <token>
+Content-Type: multipart/form-data
+```
+
+**Form Data:**
+- `image`: Archivo de imagen (JPG, PNG)
+
+**Response:** `200 OK`
+```json
+{
+  "imageName": "abc123.jpg",
+  "message": "Image uploaded successfully"
+}
+```
+
+---
+
+## Endpoints de Categorías
+
+### Listar Todas las Categorías
+Obtiene todas las categorías de eventos disponibles.
+
+```http
+GET /categories
+```
+
+**Response:** `200 OK`
+```json
+[
+  {
+    "categoryId": 1,
+    "categoryTitle": "Música",
+    "categoryDescription": "Conciertos, festivales y eventos musicales"
+  },
+  {
+    "categoryId": 2,
+    "categoryTitle": "Deportes",
+    "categoryDescription": "Eventos deportivos y actividades físicas"
+  },
+  {
+    "categoryId": 3,
+    "categoryTitle": "Cultura",
+    "categoryDescription": "Teatro, danza, exposiciones culturales"
+  }
+]
+```
+
+---
+
+### Crear Categoría
+Crea una nueva categoría (solo ADMIN).
+
+```http
+POST /categories
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "categoryTitle": "Gastronomía",
+  "categoryDescription": "Eventos culinarios y gastronómicos"
+}
+```
+
+**Response:** `201 Created`
+
+---
+
+### Actualizar Categoría
+Actualiza una categoría existente (solo ADMIN).
+
+```http
+PUT /categories/{categoryId}
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+---
+
+### Eliminar Categoría
+Elimina una categoría (solo ADMIN).
+
+```http
+DELETE /categories/{categoryId}
+Authorization: Bearer <token>
+```
+
+---
+
+## Endpoints de Comentarios
+
+### Obtener Comentarios de un Evento
+Lista todos los comentarios de un evento específico.
+
+```http
+GET /posts/{postId}/comments
+```
+
+**Response:** `200 OK`
+```json
+[
+  {
+    "id": 1,
+    "content": "¡Excelente evento! Muy recomendado.",
+    "user": {
+      "id": 2,
+      "name": "María García",
+      "username": "mariagarcia"
+    },
+    "createdDate": "2025-10-16T15:30:00"
+  }
+]
+```
+
+---
+
+### Crear Comentario
+Agrega un comentario a un evento.
+
+```http
+POST /posts/{postId}/comments
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "content": "¡Me encantó este evento! Definitivamente asistiré."
+}
+```
+
+**Response:** `201 Created`
+```json
+{
+  "id": 10,
+  "content": "¡Me encantó este evento!...",
+  "user": {
+    "id": 1,
+    "name": "Juan Pérez"
+  },
+  "createdDate": "2025-10-17T14:25:00"
+}
+```
+
+---
+
+### Eliminar Comentario
+Elimina un comentario (propio o siendo ADMIN).
+
+```http
+DELETE /comments/{commentId}
+Authorization: Bearer <token>
+```
+
+**Response:** `200 OK`
+
+---
+
+## Códigos de Error
+
+| Código | Descripción |
+|--------|-------------|
+| `400` | Bad Request - Datos inválidos |
+| `401` | Unauthorized - No autenticado |
+| `403` | Forbidden - Sin permisos |
+| `404` | Not Found - Recurso no encontrado |
+| `409` | Conflict - Email/Username ya existe |
+| `500` | Internal Server Error |
+
+**Ejemplo de Error:**
+```json
+{
+  "message": "Resource not found: Post with id 999",
+  "timestamp": "2025-10-17T14:30:00",
+  "details": "/api/posts/999"
+}
+```
+
+---
+
+## Testing con cURL
+
+### Ejemplo: Registro y Login
+
+```bash
+# 1. Registrarse
+curl -X POST http://localhost:8080/api/users/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Test User",
+    "email": "test@example.com",
+    "username": "testuser",
+    "password": "password123"
+  }'
+
+# 2. Login
+curl -X POST http://localhost:8080/api/users/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "testuser",
+    "password": "password123"
+  }'
+
+# 3. Listar eventos (guarda el token de la respuesta anterior)
+curl -X GET http://localhost:8080/api/posts \
+  -H "Authorization: Bearer <tu_token>"
+```
+
+---
 
 Este proyecto es parte de **ViveMedellin** - Plataforma para descubrir Medellín.

@@ -20,6 +20,11 @@ public class CorsConfig {
                         .allowedHeaders("*")
                         .allowCredentials(true)
                         .maxAge(3600);
+                        .allowedOrigins("https://frontend-vivamedellin.vercel.app/") // Change if needed
+                        .allowedMethods("GET", "POST", "PUT", "DELETE")
+                        .allowedHeaders("*")
+                        .allowCredentials(true)
+                        .maxAge(3600); // Cache preflight requests for 1 hour
             }
         };
     }
