@@ -66,6 +66,10 @@ public class UserServiceImpl implements UserService {
 
         user.setAbout(userDto.getAbout());
 
+        if (userDto.getProfileImage() != null) {
+            user.setProfileImage(userDto.getProfileImage());
+        }
+
         if (userDto.getRoles() != null) {
             user.setRoles(userDto.getRoles());
         }

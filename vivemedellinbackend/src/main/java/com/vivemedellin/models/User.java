@@ -29,13 +29,21 @@ public class User{
     private String password;
     private String about;
 
+    @Column(name = "profile_image")
+    private String profileImage;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Post> posts = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Comment> comments = new ArrayList<>();
 
-    // Roles mapping
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<SavedPost> savedPosts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Notification> notifications = new ArrayList<>();
+
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     private Set<Role> roles = new HashSet<>();

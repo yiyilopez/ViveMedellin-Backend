@@ -31,11 +31,15 @@ public class UserDto {
             regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,20}$",
             message = "Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character"
     )
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private String password;
         @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
         private String password;
 
     @Size(min = 10, message = "About section must be at least 10 characters long")
     private String about;
+
+    private String profileImage;
 
     private Set<Role> roles;
 }

@@ -57,7 +57,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+        configuration.setAllowedOrigins(List.of(
+                "http://localhost:3000",
+                "http://localhost:8080",
+                "https://vivemedellin-backend.onrender.com",
+                "https://frontend-vivamedellin.vercel.app"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
@@ -80,20 +84,28 @@ public class SecurityConfig {
                                 "/api/users/refresh-token",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
-                                "/swagger-ui.html"
-                        ).permitAll()
+                                "/swagger-ui.html")
+                        .permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/posts/*/comments").hasRole("USER")
+                        .requestMatchers(HttpMethod.POST, "/api/comments/*/replies").hasRole("USER")
                         .requestMatchers(HttpMethod.GET, "/api/posts/*/comments").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/comments/*").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/comments/*").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/comments/*").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/category/{categoryId}/posts").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/dashboard/**").permitAll()
+                        .requestMatchers("/api/notifications/**").authenticated()
+                        .requestMatchers("/api/saved-posts/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/users/").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/users/{userId}").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/users/profile-image/upload/*").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/users/profile-image/*").permitAll()
                         .requestMatchers(HttpMethod.PUT, "/api/posts/**").hasRole("USER")
                         .requestMatchers(HttpMethod.PUT, "/api/users/{userId}").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/users/{userId}").hasRole("ADMIN")
-                        .anyRequest().authenticated()
-                )
+                        .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())

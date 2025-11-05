@@ -24,23 +24,40 @@ Este repositorio contiene el **backend REST API** desarrollado con Spring Boot q
 - Categorización de eventos (música, deportes, cultura, gastronomía, etc.)
 - Búsqueda y filtrado inteligente
 - Paginación y ordenamiento de resultados
+- Subida de imágenes para eventos (hasta 10MB)
 
 ### Sistema de Usuarios
-- Registro y autenticación con JWT
+- Registro y autenticación con JWT (30 minutos de expiración)
 - Perfiles de usuario personalizables
+- **Imagen de perfil** - Los usuarios pueden subir foto que aparece en posts y comentarios
 - Sistema de roles (USER, ADMIN)
 - Gestión de sesiones seguras
 
 ### Interacción Social
-- Comentarios en eventos
-- Sistema de reacciones
-- Participación comunitaria
+- **Comentarios en eventos** con respuestas anidadas (hilos)
+- **Edición de comentarios** con tracking de cambios (campo `editedDate`)
+- Sistema de notificaciones inteligente:
+  - Notificación al autor del evento cuando alguien comenta
+  - Notificación a usuarios que guardaron el evento
+  - Notificación cuando responden a tus comentarios
+- **Posts guardados (favoritos)** - Guarda eventos de interés
+- Participación comunitaria activa
+
+### Dashboard y Estadísticas
+- Estadísticas generales de la plataforma
+- Posts más comentados
+- Eventos más guardados
+- Usuarios más activos
+- Categorías populares
+- Feed de actividad reciente
 
 ### Seguridad
 - Autenticación basada en JWT (JSON Web Tokens)
-- Encriptación de contraseñas con BCrypt
+- Encriptación de contraseñas con BCrypt (factor 12)
 - Control de acceso basado en roles
+- Categorías administradas exclusivamente por ADMIN
 - CORS configurado para frontend
+- Sesiones stateless
 
 ## Arquitectura
 
@@ -51,18 +68,25 @@ Arquitectura Monolítica en Capas
 │   CAPA DE PRESENTACIÓN                  │
 │   controllers/                          │
 │   - PostController (Eventos)            │
-│   - UserController                      │
-│   - CategoryController                  │
-│   - CommentController                   │
+│   - UserController (+ Imágenes)         │
+│   - CategoryController (ADMIN)          │
+│   - CommentController (+ Edición)       │
+│   - NotificationController              │
+│   - SavedPostController                 │
+│   - DashboardController                 │
 └─────────────────────────────────────────┘
                     ↓
 ┌─────────────────────────────────────────┐
 │   CAPA DE NEGOCIO                       │
 │   services/                             │
 │   - PostService (Lógica de eventos)     │
-│   - UserService                         │
+│   - UserService (+ ProfileImage)        │
 │   - CategoryService                     │
-│   - CommentService                      │
+│   - CommentService (+ Edición)          │
+│   - NotificationService                 │
+│   - SavedPostService                    │
+│   - DashboardService.                   │
+│   - FileService (Imágenes)              │
 └─────────────────────────────────────────┘
                     ↓
 ┌─────────────────────────────────────────┐
@@ -72,11 +96,20 @@ Arquitectura Monolítica en Capas
 │   - UserRepo                            │
 │   - CategoryRepo                        │
 │   - CommentRepo                         │
+│   - NotificationRepo ⭐                 │
+│   - SavedPostRepo ⭐                    │
 └─────────────────────────────────────────┘
                     ↓
 ┌─────────────────────────────────────────┐
 │   BASE DE DATOS                         │
-│   PostgreSQL                            │
+│   PostgreSQL (9 tablas)                 │
+│   - users (+ profile_image)             │
+│   - posts                               │
+│   - categories                          │
+│   - comments (+ edited_date)            │
+│   - saved_posts                         │
+│   - notifications                       │
+│   - roles                               │
 └─────────────────────────────────────────┘
 ```
 
@@ -104,27 +137,45 @@ vivemedellinbackend/
 │   ├── config/                         # Configuraciones
 │   │   ├── SecurityConfig.java         # Seguridad JWT
 │   │   ├── CorsConfig.java            # CORS
+│   │   ├── OpenApiConfig.java        # Swagger/OpenAPI
 │   │   └── AppConstants.java          # Constantes
-│   ├── controllers/                    # Endpoints REST
+│   ├── controllers/                    # Endpoints REST (9)
 │   │   ├── PostController.java        # API de eventos
-│   │   ├── UserController.java        # API de usuarios
-│   │   ├── CategoryController.java    # API de categorías
-│   │   └── CommentController.java     # API de comentarios
-│   ├── models/                        # Entidades JPA
+│   │   ├── UserController.java        # API de usuarios + imágenes 
+│   │   ├── CategoryController.java    # API de categorías (ADMIN) 
+│   │   ├── CommentController.java     # API de comentarios + edición 
+│   │   ├── NotificationController.java   # API de notificaciones
+│   │   ├── SavedPostController.java     # API de posts guardados
+│   │   ├── DashboardController.java     # API de estadísticas
+│   │   ├── AuthController.java        # Autenticación
+│   │   └── HomeController.java        # Landing page
+│   ├── models/                        # Entidades JPA (8)
 │   │   ├── Post.java                  # Modelo de evento
-│   │   ├── User.java                  # Modelo de usuario
+│   │   ├── User.java                 # Modelo de usuario + profileImage
 │   │   ├── Category.java              # Modelo de categoría
-│   │   ├── Comment.java               # Modelo de comentario
-│   │   └── Role.java                  # Enum de roles
+│   │   ├── Comment.java              # Modelo de comentario + editedDate
+│   │   ├── SavedPost.java            # Posts guardados por usuarios
+│   │   ├── Notification.java         # Notificaciones del sistema
+│   │   ├── Role.java                  # Enum de roles
+│   │   └── CustomUserDetails.java    # Detalles de seguridad
 │   ├── repositories/                  # Interfaces JPA
 │   ├── services/                      # Lógica de negocio
+│   │   ├── impl/                      # Implementaciones
+│   │   └── FileService.java          # Manejo de archivos
 │   ├── payloads/                      # DTOs
+│   │   ├── UserDto.java              # DTO con profileImage
+│   │   ├── UserResponseDto.java      # DTO con profileImage
+│   │   ├── CommentDto.java           # DTO con editedDate
+│   │   ├── NotificationDto.java      # DTO de notificaciones
+│   │   ├── DashboardDto.java         # DTO de estadísticas
+│   │   └── ...
 │   ├── security/                      # Servicios de seguridad
 │   ├── filters/                       # Filtros JWT
 │   ├── exceptions/                    # Manejo de errores
 │   └── utils/                         # Utilidades
 └── src/main/resources/
     ├── application.properties         # Configuración
+
     └── templates/                     # Plantillas HTML
 ```
 
@@ -144,15 +195,7 @@ git clone https://github.com/yiyilopez/ViveMedellin-Backend.git
 cd ViveMedellin-Backend/vivemedellinbackend
 ```
 
-### 2. Configurar la base de datos
-
-Crear una base de datos PostgreSQL:
-
-```sql
-CREATE DATABASE vivemedellin_db;
-```
-
-### 3. Configurar `application.properties`
+### 2. Configurar `application.properties`
 
 Editar `src/main/resources/application.properties`:
 
@@ -184,28 +227,68 @@ mvn spring-boot:run
 
 ## Endpoints Principales
 
-### Endpoints Públicos
+### Endpoints Públicos (Sin autenticación)
 
 | Método | Endpoint | Descripción |
 |--------|----------|-------------|
 | POST | `/api/users/register` | Registrar nuevo usuario |
-| POST | `/api/users/login` | Iniciar sesión |
-| GET | `/api/posts` | Listar todos los eventos |
+| POST | `/api/users/login` | Iniciar sesión (obtener JWT) |
+| GET | `/api/posts` | Listar todos los eventos (paginado) |
 | GET | `/api/posts/{id}` | Obtener evento específico |
-| GET | `/api/categories` | Listar categorías |
+| GET | `/api/posts/search/{keywords}` | Buscar eventos por palabra clave |
+| GET | `/api/categories` | Listar todas las categorías |
+| GET | `/api/categories/{id}` | Obtener categoría específica |
 | GET | `/api/posts/{id}/comments` | Ver comentarios de un evento |
+| GET | `/api/users/profile-image/{imageName}` | Obtener imagen de perfil |
+| GET | `/api/posts/image/{imageName}` | Obtener imagen de evento |
+| GET | `/api/dashboard` | Obtener estadísticas completas |
+| GET | `/api/dashboard/stats` | Estadísticas generales |
 
-### Endpoints Protegidos (Requieren Autenticación)
+### Endpoints Protegidos (Requieren Autenticación - USER)
 
-| Método | Endpoint | Rol Requerido | Descripción |
-|--------|----------|---------------|-------------|
-| POST | `/api/posts` | USER | Crear nuevo evento |
-| PUT | `/api/posts/{id}` | USER | Actualizar evento |
-| DELETE | `/api/posts/{id}` | USER/ADMIN | Eliminar evento |
-| POST | `/api/posts/{id}/comments` | USER | Comentar en evento |
-| PUT | `/api/users/{id}` | USER | Actualizar perfil |
-| DELETE | `/api/users/{id}` | ADMIN | Eliminar usuario |
-| GET | `/api/users` | ADMIN | Listar todos los usuarios |
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| POST | `/api/posts` | Crear nuevo evento |
+| PUT | `/api/posts/{id}` | Actualizar evento propio |
+| DELETE | `/api/posts/{id}` | Eliminar evento propio |
+| POST | `/api/posts/image/upload/{id}` | Subir imagen a evento |
+| POST | `/api/posts/{postId}/comments` | Comentar en evento |
+| POST | `/api/comments/{commentId}/replies` | Responder a comentario |
+| PUT | `/api/comments/{id}` | Editar comentario propio |
+| DELETE | `/api/comments/{id}` | Eliminar comentario propio |
+| PUT | `/api/users/{id}` | Actualizar perfil propio |
+| POST | `/api/users/profile-image/upload/{id}` | Subir imagen de perfil |
+| POST | `/api/saved-posts/{postId}` | Guardar evento en favoritos |
+| DELETE | `/api/saved-posts/{postId}` | Quitar evento de favoritos |
+| GET | `/api/saved-posts` | Listar eventos guardados |
+| GET | `/api/saved-posts/{postId}/check` | Verificar si evento está guardado |
+| GET | `/api/notifications` | Listar todas las notificaciones |
+| GET | `/api/notifications/unread` | Listar notificaciones no leídas |
+| GET | `/api/notifications/unread/count` | Contar notificaciones pendientes |
+| PUT | `/api/notifications/{id}/read` | Marcar notificación como leída |
+| PUT | `/api/notifications/read-all` | Marcar todas como leídas |
+
+### Endpoints ADMIN (Requieren Rol ADMIN)
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| POST | `/api/categories` | Crear nueva categoría |
+| PUT | `/api/categories/{id}` | Actualizar categoría |
+| DELETE | `/api/categories/{id}` | Eliminar categoría |
+| GET | `/api/users/` | Listar todos los usuarios |
+| DELETE | `/api/users/{id}` | Eliminar cualquier usuario |
+| DELETE | `/api/posts/{id}` | Eliminar cualquier evento |
+| DELETE | `/api/comments/{id}` | Eliminar cualquier comentario |
+
+### Endpoints de Dashboard (Públicos)
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| GET | `/api/dashboard/top-commented-posts` | Eventos más comentados |
+| GET | `/api/dashboard/most-saved-posts` | Eventos más guardados |
+| GET | `/api/dashboard/most-active-users` | Usuarios más activos |
+| GET | `/api/dashboard/popular-categories` | Categorías populares |
+| GET | `/api/dashboard/recent-activity` | Actividad reciente |
 
 ## Autenticación
 
@@ -241,19 +324,21 @@ Respuesta:
 
 Una vez ejecutada la aplicación, accede a la documentación interactiva:
 
-- **Swagger UI**: http://localhost:8080/swagger-ui.html
+- **Swagger UI**: http://localhost:8080/swagger-ui/index.html
 - **OpenAPI JSON**: http://localhost:8080/v3/api-docs
 
-## Contribución
+Swagger incluye:
+- Documentación completa de todos los endpoints
+- Autenticación JWT integrada (botón "Authorize")
+- Pruebas interactivas de la API
+- Esquemas de request/response
+- Ejemplos de uso
 
-Las contribuciones son bienvenidas. Por favor:
 
-1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
 
+---
+
+## Licencia
 ## Licencia
 
 Este proyecto es parte de **ViveMedellin** - Plataforma para descubrir Medellín.
@@ -770,6 +855,4 @@ curl -X GET http://localhost:8080/api/posts \
 
 ---
 
-<div align="center">
-Para más información, visita la documentación Swagger en: http://localhost:8080/swagger-ui.html
-</div>
+Este proyecto es parte de **ViveMedellin** - Plataforma para descubrir Medellín.

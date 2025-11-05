@@ -54,7 +54,7 @@
                 about: document.getElementById("signupAbout").value
             };
 
-            const response = await fetch("http://localhost:8080/api/users/register", {
+            const response = await fetch("/api/users/register", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -73,11 +73,11 @@
 
         async function login() {
             const credentials = {
-                email: document.getElementById("loginEmail").value,
+                username: document.getElementById("loginEmail").value,
                 password: document.getElementById("loginPassword").value
             };
 
-            const response = await fetch("http://localhost:8080/api/auth/login", {
+            const response = await fetch("/api/users/login", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
