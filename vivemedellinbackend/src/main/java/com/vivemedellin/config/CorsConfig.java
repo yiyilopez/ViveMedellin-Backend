@@ -16,11 +16,11 @@ public class CorsConfig {
             public void addCorsMappings(CorsRegistry registry) {
                 // Allow all paths, add your allowed origin, and allow necessary methods/headers
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:3000")  // Change if needed
+                        .allowedOrigins("https://frontend-vivamedellin.vercel.app/") // Change if needed
                         .allowedMethods("GET", "POST", "PUT", "DELETE")
                         .allowedHeaders("*")
                         .allowCredentials(true)
-                        .maxAge(3600);  // Cache preflight requests for 1 hour
+                        .maxAge(3600); // Cache preflight requests for 1 hour
             }
         };
     }
