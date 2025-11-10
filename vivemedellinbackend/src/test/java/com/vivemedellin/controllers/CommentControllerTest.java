@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -29,8 +30,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 
-@WebMvcTest(CommentController.class)
+@SpringBootTest
+@AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureTestDatabase
 public class CommentControllerTest {
 
     @Autowired
@@ -48,6 +53,7 @@ public class CommentControllerTest {
 
     @MockBean
     private CustomUserDetailService customUserDetailService;
+
 
     //CP-002
     @Test
