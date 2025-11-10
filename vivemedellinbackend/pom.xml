@@ -33,6 +33,13 @@
 				<role>DevOps</role>
 			</roles>
 		</developer>
+		<developer>
+			<name>Yeison Ochoa</name>
+			<email>yeison.ochoa@udea.edu.co</email>
+			<roles>
+				<role>Tester</role>
+			</roles>
+		</developer>
 	</developers>
 	<scm>
 		<connection>scm:git:git://github.com/yiyilopez/ViveMedellin-Backend.git</connection>

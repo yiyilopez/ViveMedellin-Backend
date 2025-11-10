@@ -7,6 +7,7 @@ import com.vivemedellin.security.CustomUserDetailService;
 import com.vivemedellin.services.CommentService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc; //Para desactivar filtros de seguridad
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -17,12 +18,15 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(CommentController.class)
+@AutoConfigureMockMvc(addFilters = false)       //Filtros de seguridad desactivados
 public class CommentControllerTest {
 
     @Autowired
@@ -41,6 +45,7 @@ public class CommentControllerTest {
     @MockBean
     private CustomUserDetailService customUserDetailService;
 
+    //CP-002
     @Test
     @WithMockUser(username = "usuario@test.com", roles = {"USER"})
     void shouldCreateAndDisplayRichComment_whenAuthenticatedUserPosts() throws Exception {
@@ -76,6 +81,7 @@ public class CommentControllerTest {
                 .andExpect(jsonPath("$[0].content").value(richContent));
     }
 
+    //CP-002 Camino excepción
     @Test
     void shouldRejectCommentCreation_whenUserNotAuthenticated() throws Exception {
         int postId = 456;
@@ -87,5 +93,39 @@ public class CommentControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto)))
                 .andExpect(status().isUnauthorized());
+    }
+
+    // Test: Eliminación exitosa de un comentario propio
+    @Test
+    @WithMockUser(username = "usuario@test.com", roles = {"USER"})
+    void shouldDeleteOwnComment_whenAuthenticatedUserIsAuthor() throws Exception {
+        // Arrange (Given que el usuario está autenticado en la plataforma
+        // And es el autor del comentario)
+        int commentId = 1;
+        int postId = 123;
+
+        // Mock: El servicio elimina el comentario sin lanzar excepción
+        // (no necesitamos configurar when porque deleteComment es void)
+        
+        // Mock: Después de eliminar, la lista de comentarios no incluye el eliminado
+        when(commentService.getCommentsByPost(postId))
+                .thenReturn(List.of()); // Lista vacía después de eliminar
+
+        // Act (When selecciona la opción para eliminar y confirma la acción)
+        mockMvc.perform(delete("/api/comment/" + commentId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value("Comment deleted Successfully"))
+                .andExpect(jsonPath("$.success").value(true));
+
+        // Assert (Then el comentario se elimina)
+        verify(commentService).deleteComment(commentId);
+
+        // Assert (And desaparece de la vista de todos los usuarios)
+        mockMvc.perform(get("/api/posts/" + postId + "/comments"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$").isEmpty());
     }
 }

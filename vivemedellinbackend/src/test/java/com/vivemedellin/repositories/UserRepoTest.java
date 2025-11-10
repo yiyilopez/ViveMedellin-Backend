@@ -8,10 +8,10 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import com.vivemedellin.models.User;;
+import com.vivemedellin.models.User;
 
 @DataJpaTest
-public class UserRepoTest {
+class UserRepoTest {
     @Autowired
     private UserRepo userRepo;
 
