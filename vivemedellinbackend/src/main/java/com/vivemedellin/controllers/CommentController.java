@@ -32,6 +32,14 @@ public class CommentController {
         return new ResponseEntity<>(new ApiResponse("Comment deleted Successfully", true), HttpStatus.OK);
     }
 
+    @PutMapping("/comment/{commentId}")
+    public ResponseEntity<CommentDto> updateComment(@RequestBody CommentDto commentDto,
+                                                   @PathVariable Integer commentId,
+                                                   Principal principal) {
+        CommentDto updatedComment = this.commentService.updateComment(commentDto, commentId, principal);
+        return new ResponseEntity<>(updatedComment, HttpStatus.OK);
+    }
+
     @GetMapping("/posts/{postId}/comments")
     public ResponseEntity<List<CommentDto>> getCommentsByPost(@PathVariable Integer postId) {
         List<CommentDto> comments = this.commentService.getCommentsByPost(postId);
