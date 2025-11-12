@@ -68,4 +68,22 @@ public class CommentServiceImpl implements CommentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Comment", "CommentId", commentId));
         this.commentRepo.delete(comment);
     }
+
+    @Override
+    public CommentDto updateComment(CommentDto commentDto, Integer commentId, Principal principal) {
+        Comment comment = this.commentRepo.findById(commentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Comment", "CommentId", commentId));
+
+        String username = principal.getName();
+
+        // Validar que el usuario es el autor del comentario
+        if (!comment.getUser().getEmail().equals(username)) {
+            throw new org.springframework.security.access.AccessDeniedException("No tienes permiso para editar este comentario");
+        }
+
+        comment.setContent(commentDto.getContent());
+        Comment updatedComment = this.commentRepo.save(comment);
+
+        return this.modelMapper.map(updatedComment, CommentDto.class);
+    }
 }

@@ -16,6 +16,13 @@ import java.util.stream.Collectors;
 @Setter
 public class User{
 
+    public User(String name, String email, String password, String about){
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.about = about;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
