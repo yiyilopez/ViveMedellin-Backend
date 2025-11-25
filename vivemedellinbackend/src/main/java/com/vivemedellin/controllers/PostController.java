@@ -8,8 +8,6 @@ import com.vivemedellin.payloads.PostResponse;
 import com.vivemedellin.repositories.UserRepo;
 import com.vivemedellin.services.FileService;
 import com.vivemedellin.services.PostService;
-import com.vivemedellin.services.UserService;
-import com.vivemedellin.utils.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -24,7 +22,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.*;
@@ -47,13 +44,7 @@ public class PostController {
     private FileService fileService;
 
     @Autowired
-    private UserService userService;
-
-    @Autowired
     private UserRepo userRepo;
-
-    @Autowired
-    private JwtUtil jwtUtil;
 
     @Value("${project.image}")
     private String path;
@@ -76,21 +67,9 @@ public class PostController {
             @RequestParam(value = "image", required = false) MultipartFile image,
             @PathVariable Integer userId,
             @PathVariable Integer categoryId,
-            @RequestHeader("Authorization") String authorizationHeader) throws IOException {
+            Principal principal) throws IOException {
 
-        String token = authorizationHeader.replace("Bearer ", "");
-
-        if (jwtUtil.isTokenExpired(token)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-        }
-
-        String username = jwtUtil.extractUsername(token);
-        UserDetails userDetails = userService.loadUserByUsername(username);
-
-        if (!jwtUtil.validateToken(token, userDetails)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-        }
-
+        String username = principal.getName();
         User actualUser = userRepo.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
