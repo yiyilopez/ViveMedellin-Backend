@@ -36,6 +36,20 @@ public class SavedPostController {
         return new ResponseEntity<>(savedPosts, HttpStatus.OK);
     }
 
+    // Fetch saved posts by userId (e.g. for admin dashboard)
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<PostDto>> getSavedPostsByUserId(@PathVariable Integer userId) {
+        List<PostDto> savedPosts = savedPostService.getSavedPostsByUserId(userId);
+        return new ResponseEntity<>(savedPosts, HttpStatus.OK);
+    }
+
+    // Fetch saved posts by email (alternative lookup)
+    @GetMapping("/user/email/{email}")
+    public ResponseEntity<List<PostDto>> getSavedPostsByEmail(@PathVariable String email) {
+        List<PostDto> savedPosts = savedPostService.getSavedPostsByEmail(email);
+        return new ResponseEntity<>(savedPosts, HttpStatus.OK);
+    }
+
     @GetMapping("/{postId}/check")
     public ResponseEntity<Boolean> checkIfPostSaved(@PathVariable Integer postId, Principal principal) {
         boolean isSaved = savedPostService.isPostSavedByUser(postId, principal);

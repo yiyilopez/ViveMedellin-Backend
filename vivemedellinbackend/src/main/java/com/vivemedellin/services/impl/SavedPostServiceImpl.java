@@ -73,11 +73,7 @@ public class SavedPostServiceImpl implements SavedPostService {
         User user = userRepo.findByEmail(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", username));
 
-        List<SavedPost> savedPosts = savedPostRepo.findByUser(user);
-
-        return savedPosts.stream()
-                .map(savedPost -> modelMapper.map(savedPost.getPost(), PostDto.class))
-                .collect(Collectors.toList());
+        return mapSavedPosts(savedPostRepo.findByUser(user));
     }
 
     @Override
@@ -91,4 +87,24 @@ public class SavedPostServiceImpl implements SavedPostService {
 
         return savedPostRepo.existsByUserAndPost(user, post);
     }
+
+        @Override
+        public List<PostDto> getSavedPostsByUserId(Integer userId) {
+                User user = userRepo.findById(userId)
+                                .orElseThrow(() -> new ResourceNotFoundException("User", "userId", userId));
+                return mapSavedPosts(savedPostRepo.findByUser(user));
+        }
+
+        @Override
+        public List<PostDto> getSavedPostsByEmail(String email) {
+                User user = userRepo.findByEmail(email)
+                                .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
+                return mapSavedPosts(savedPostRepo.findByUser(user));
+        }
+
+        private List<PostDto> mapSavedPosts(List<SavedPost> savedPosts) {
+                return savedPosts.stream()
+                                .map(savedPost -> modelMapper.map(savedPost.getPost(), PostDto.class))
+                                .collect(Collectors.toList());
+        }
 }
