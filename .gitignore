@@ -86,8 +86,12 @@ application-prod.properties
 .env
 
 # Uploaded Files
-vivemedellin/images/
-uploads/
+vivemedellin/images/*
+!vivemedellin/images/.gitkeep
+vivemedellinbackend/images/*
+!vivemedellinbackend/images/.gitkeep
+uploads/*
+!uploads/.gitkeep
 
 # Logs
 logs/
