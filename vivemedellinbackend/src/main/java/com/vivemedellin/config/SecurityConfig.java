@@ -60,13 +60,28 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
+        
+        // IMPORTANTE: En producción, especificar solo los orígenes necesarios
         configuration.setAllowedOrigins(List.of(
                 "http://localhost:3000",
                 "http://localhost:8080",
                 "https://vivemedellin-backend.onrender.com",
                 "https://frontend-vivamedellin.vercel.app"));
+        
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
+        
+        // SEGURIDAD: Limitar headers específicos en vez de "*"
+        configuration.setAllowedHeaders(List.of(
+                "Authorization",
+                "Content-Type",
+                "Accept",
+                "X-Requested-With",
+                "Cache-Control"
+        ));
+        
+        // Exponer headers necesarios para el frontend
+        configuration.setExposedHeaders(List.of("Authorization"));
+        
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 
@@ -78,8 +93,13 @@ public class SecurityConfig {
     @Bean
 public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http
+        // CSRF deshabilitado: SEGURO porque usamos JWT stateless (no cookies)
+        // Solo habilitar CSRF si usas sesiones basadas en cookies
         .csrf(AbstractHttpConfigurer::disable)
+        
         .cors(Customizer.withDefaults())
+        
+        // Stateless: sin sesiones en el servidor, todo con JWT
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
         // ⬇️ NUEVO: manejadores uniformes para 401/403 en JSON
