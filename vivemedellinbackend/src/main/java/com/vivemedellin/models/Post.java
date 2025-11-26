@@ -14,6 +14,13 @@ import java.util.*;
 @NoArgsConstructor
 public class Post {
 
+    public Post(String postTitle, String content, String imageName, Date creationDate){
+        this.postTitle = postTitle;
+        this.content = content;
+        this.imageName = imageName;
+        this.creationDate = creationDate;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer postId;
