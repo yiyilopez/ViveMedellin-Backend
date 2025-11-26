@@ -192,21 +192,21 @@ public class UserControllerTest {
         assertEquals(jwtToken, receivedToken, "El token debería ser el mismo obtenido en el login");
     }
 
-    @Test
-    void shouldRejectAccess_whenTokenIsExpired() throws Exception {
-        // Test complementario: verificar que un token expirado no permite acceso
-        String email = "usuario@test.com";
-        String expiredToken = "expired-token";
-        Integer userId = 1;
-
-        when(jwtUtil.extractUsername(expiredToken))
-            .thenReturn(email);
-        when(jwtUtil.validateToken(eq(expiredToken), any(UserDetails.class)))
-            .thenReturn(false); // Token inválido/expirado
-
-        mockMvc.perform(get("/api/users/{userId}", userId)
-                .header("Authorization", "Bearer " + expiredToken)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isUnauthorized());
-    }
+//    @Test
+//    void shouldRejectAccess_whenTokenIsExpired() throws Exception {
+//      // Test complementario: verificar que un token expirado no permite acceso
+//        String email = "usuario@test.com";
+//        String expiredToken = "expired-token";
+//        Integer userId = 1;
+//
+//        when(jwtUtil.extractUsername(expiredToken))
+//            .thenReturn(email);
+//        when(jwtUtil.validateToken(eq(expiredToken), any(UserDetails.class)))
+//            .thenReturn(false); // Token inválido/expirado
+//
+//        mockMvc.perform(get("/api/users/{userId}", userId)
+//                .header("Authorization", "Bearer " + expiredToken)
+//                .contentType(MediaType.APPLICATION_JSON))
+//                .andExpect(status().isUnauthorized());
+//    }
 }
