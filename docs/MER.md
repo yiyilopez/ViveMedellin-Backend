@@ -119,6 +119,3 @@ end note
 @enduml
 ```
 
-
-
-Fin del MER.
